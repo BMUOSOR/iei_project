@@ -1,4 +1,4 @@
-package com.example.iei_project.backend.api.wrappers
+package com.example.iei_project.backend.api.conversors
 
 import android.location.Geocoder
 import com.example.iei_project.backend.api.data.Estacion
@@ -7,7 +7,7 @@ import com.example.iei_project.backend.api.data.Provincia
 import com.example.iei_project.backend.api.dtos.TipoEstacion
 import org.json.JSONArray
 import org.json.JSONObject
-class JsonWrapperCV(private val geocoder: Geocoder) {
+class JsonConversorCV(private val geocoder: Geocoder) {
 
     fun wrapList(jsonArray: JSONArray): JSONArray {
         val list = JSONArray()

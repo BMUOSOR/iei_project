@@ -1,6 +1,5 @@
-package com.example.iei_project.backend.api.wrappers
+package com.example.iei_project.backend.api.conversors
 
-import android.util.Log
 import com.example.iei_project.backend.api.data.Estacion
 import com.example.iei_project.backend.api.data.Localidad
 import com.example.iei_project.backend.api.data.Provincia
@@ -10,7 +9,7 @@ import com.opencsv.CSVReaderBuilder
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.Reader
-class CsvWrapperGAL() {
+class CsvConversorGAL() {
 
     fun parse(reader: Reader): JSONArray {
         val csv = CSVReaderBuilder(reader)

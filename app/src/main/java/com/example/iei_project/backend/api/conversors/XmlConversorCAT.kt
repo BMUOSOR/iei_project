@@ -1,11 +1,11 @@
-package com.example.iei_project.backend.api.wrappers
+package com.example.iei_project.backend.api.conversors
 
 import android.util.Xml
 import org.json.JSONArray
 import org.json.JSONObject
 import org.xmlpull.v1.XmlPullParser
 import java.io.InputStream
-class XmlWrapperCAT {
+class XmlConversorCAT {
     fun parseList(input: InputStream): JSONArray {
         val parser = Xml.newPullParser()
         parser.setInput(input, null)

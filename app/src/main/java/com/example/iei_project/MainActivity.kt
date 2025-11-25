@@ -17,9 +17,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.iei_project.backend.api.extractors.ExtractorEstacion
 import com.example.iei_project.backend.api.extractors.ExtractorLocalidad
 import com.example.iei_project.backend.api.extractors.ExtractorProvincia
-import com.example.iei_project.backend.api.wrappers.CsvWrapperGAL
-import com.example.iei_project.backend.api.wrappers.JsonWrapperCV
-import com.example.iei_project.backend.api.wrappers.XmlWrapperCAT
+import com.example.iei_project.backend.api.conversors.CsvConversorGAL
+import com.example.iei_project.backend.api.conversors.JsonConversorCV
+import com.example.iei_project.backend.api.conversors.XmlConversorCAT
 import com.example.iei_project.ui.theme.Iei_projectTheme
 import org.json.JSONArray
 import java.io.InputStream
@@ -39,7 +39,7 @@ class MainActivity : ComponentActivity() {
         // -------- JSON (lista) ----------
         val jsonString = readAsset("estaciones.json")
         val jsonArray = JSONArray(jsonString)
-        val wrapperCV = JsonWrapperCV(Geocoder(this))
+        val wrapperCV = JsonConversorCV(Geocoder(this))
         val listaCV = wrapperCV.wrapList(jsonArray)
 
         Log.d("ITV", "CV primera estación → ${extractorEstacion.extractLista(listaCV).firstOrNull()}")
@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
 
         // -------- XML (lista) ----------
         val xmlStream = readAssetStream("ITV-CAT.xml")
-        val catExtractor = XmlWrapperCAT()
+        val catExtractor = XmlConversorCAT()
         val listaCAT = catExtractor.parseList(xmlStream)
 
         Log.d("ITV", "CAT primera estación → ${extractorEstacion.extractLista(listaCAT).firstOrNull()}")
@@ -55,7 +55,7 @@ class MainActivity : ComponentActivity() {
 
         // -------- CSV (lista) ----------
         val csvReader = readAsset("Estacions_ITV.csv").reader()
-        val galExtractor = CsvWrapperGAL()
+        val galExtractor = CsvConversorGAL()
         val listaGAL = galExtractor.parse(csvReader)
 
         Log.d("ITV", "GAL primera estación → ${extractorEstacion.extractLista(listaGAL).firstOrNull()}")
