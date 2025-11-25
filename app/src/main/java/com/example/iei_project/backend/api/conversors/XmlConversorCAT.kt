@@ -1,6 +1,8 @@
 package com.example.iei_project.backend.api.conversors
 
 import android.util.Xml
+import com.example.iei_project.backend.api.data.Localidad
+import com.example.iei_project.backend.api.data.Provincia
 import org.json.JSONArray
 import org.json.JSONObject
 import org.xmlpull.v1.XmlPullParser
@@ -52,6 +54,15 @@ class XmlConversorCAT {
             event = parser.next()
         }
 
+        val jsonLocalidad = JSONObject()
+        val jsonProvincia = JSONObject()
+        jsonProvincia.apply {
+            put("nombre","Barcelona")
+        }
+        jsonLocalidad.apply {
+            put("nombre",municipio)
+            put("provincia",jsonProvincia)
+        }
         return JSONObject().apply {
             put("nombre", "CAT-$estaci")
             put("tipo", "EstacionFija") // o tu enum según convenga
@@ -63,12 +74,8 @@ class XmlConversorCAT {
             put("horario", horario)
             put("contacto", contacto)
             put("url", web)
-            put("localidad", JSONObject().apply {
-                put("nombre", municipio)
-                put("provnicia", JSONObject().apply {
-                    put("nombre", "Catalunya")
-                })
-            })
+            put("localidad",jsonLocalidad)
+
         }
     }
 

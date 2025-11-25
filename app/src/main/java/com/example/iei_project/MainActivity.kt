@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -21,10 +22,14 @@ import com.example.iei_project.backend.api.conversors.CsvConversorGAL
 import com.example.iei_project.backend.api.conversors.JsonConversorCV
 import com.example.iei_project.backend.api.conversors.XmlConversorCAT
 import com.example.iei_project.ui.theme.Iei_projectTheme
+import com.example.iei_project.ui.viewmodel.EstacionesViewModel
 import org.json.JSONArray
 import java.io.InputStream
 
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(
+) {
+
+    private val viewModel : EstacionesViewModel by viewModels()
 
     fun Context.readAsset(name: String): String =
         assets.open(name).bufferedReader().use { it.readText() }
@@ -34,7 +39,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        Log.d("MainActivity", "Cargando los datos...")
+        viewModel.cargar(JSONArray(readAsset("estaciones.json")),readAssetStream("ITV-CAT.xml"),readAsset("Estacions_ITV.csv").reader())
+        /*
         val extractorEstacion = ExtractorEstacion(Geocoder(this), ExtractorLocalidad(ExtractorProvincia()))
         // -------- JSON (lista) ----------
         val jsonString = readAsset("estaciones.json")
@@ -43,7 +50,7 @@ class MainActivity : ComponentActivity() {
         val listaCV = wrapperCV.wrapList(jsonArray)
 
         Log.d("ITV", "CV primera estación → ${extractorEstacion.extractLista(listaCV).firstOrNull()}")
-
+        Log.d("SupabaseService", "Subiendo la primera estación")
 
         // -------- XML (lista) ----------
         val xmlStream = readAssetStream("ITV-CAT.xml")
@@ -60,6 +67,8 @@ class MainActivity : ComponentActivity() {
 
         Log.d("ITV", "GAL primera estación → ${extractorEstacion.extractLista(listaGAL).firstOrNull()}")
 
+
+         */
 
         // -------- Compose UI --------
         enableEdgeToEdge()

@@ -7,6 +7,6 @@ class ExtractorLocalidad(
     private val extractorProvincia: ExtractorProvincia
 ) {
     fun extractLocalidad(json : JSONObject) : Localidad {
-        return Localidad(json.getString("nombre"),extractorProvincia.extractProvincia(json.getJSONObject("provnicia")))
+        return Localidad(json.getString("nombre"),extractorProvincia.extractProvincia(json.getJSONObject("provincia")))
     }
 }

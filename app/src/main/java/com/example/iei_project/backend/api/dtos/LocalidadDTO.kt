@@ -1,7 +1,9 @@
 package com.example.iei_project.backend.api.dtos
 
+import com.example.iei_project.backend.api.data.Provincia
+
 class LocalidadDTO(
-    val en_provicnia : Long,
-    val codigo_provincia: Long,
-    val nombre: String
+    val codigo: Long,
+    val nombre: String,
+    val provincia: Long
 )

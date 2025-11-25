@@ -20,6 +20,7 @@ class JsonConversorCV(private val geocoder: Geocoder) {
         return list
     }
     private fun parse(json: JSONObject): JSONObject {
+        val json = JSONObject()
         val tipoEnum = when(json.getString("TIPO ESTACIÓN").lowercase()) {
             "estación fija" -> TipoEstacion.EstacionFija
             "estación móvil" -> TipoEstacion.EstacionMovil
@@ -40,10 +41,12 @@ class JsonConversorCV(private val geocoder: Geocoder) {
             url = "https://itv.gva.es",
             localidad = Localidad(
                 nombre = json.getString("MUNICIPIO"),
-                provincia = Provincia(json.getString("PROVINCIA"))
+                provincia = Provincia(
+                    nombre = json.getString("PROVINCIA")
+                )
             )
         )
-        val json = JSONObject()
+
         json.put("nombre",estacion.nombre)
         json.put("tipo",estacion.tipo)
         json.put("direccion", estacion.direccion)
@@ -54,12 +57,7 @@ class JsonConversorCV(private val geocoder: Geocoder) {
         json.put("horario",estacion.horario)
         json.put("contacto",estacion.contacto)
         json.put("url",estacion.url)
-        val provniciaJSON = JSONObject()
-        provniciaJSON.put("nombre",estacion.localidad.provincia.nombre)
-        val localidadJSON = JSONObject()
-        localidadJSON.put("nombre",estacion.localidad.nombre)
-        localidadJSON.put("provnicia",provniciaJSON)
-        json.put("localidad",localidadJSON)
+        json.put("localidad",estacion.localidad)
 
         return json
     }

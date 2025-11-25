@@ -1,5 +1,6 @@
 package com.example.iei_project.backend.api.conversors
 
+import android.util.Log
 import com.example.iei_project.backend.api.data.Estacion
 import com.example.iei_project.backend.api.data.Localidad
 import com.example.iei_project.backend.api.data.Provincia
@@ -9,6 +10,8 @@ import com.opencsv.CSVReaderBuilder
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.Reader
+import java.nio.charset.StandardCharsets
+
 class CsvConversorGAL() {
 
     fun parse(reader: Reader): JSONArray {
@@ -24,7 +27,10 @@ class CsvConversorGAL() {
             val direccion = row[1]
             val concello = row[2]
             val cp = row[3]
-            val provincia = row[4]
+            val provinciaRaw = row[4]
+            val bytesProvincia = provinciaRaw.toByteArray(StandardCharsets.UTF_8)
+            val provincia = String(bytesProvincia, StandardCharsets.UTF_8)
+            Log.d("Provincia", "Nombre: $provincia")
             val horario = row[6]
             val url = row[7]
             val correo = row[8]
@@ -43,7 +49,9 @@ class CsvConversorGAL() {
                 url = url,
                 localidad = Localidad(
                     nombre = concello,
-                    provincia = Provincia(provincia)
+                    provincia = Provincia(
+                        nombre = provincia
+                    )
                 )
             )
             val json = JSONObject()
@@ -57,13 +65,15 @@ class CsvConversorGAL() {
             json.put("horario",estacion.horario)
             json.put("contacto",estacion.contacto)
             json.put("url",estacion.url)
-            val provniciaJSON = JSONObject()
-            provniciaJSON.put("nombre",estacion.localidad.provincia.nombre)
-            val localidadJSON = JSONObject()
-            localidadJSON.put("nombre",estacion.localidad.nombre)
-            localidadJSON.put("provnicia",provniciaJSON)
-            json.put("localidad",localidadJSON)
-
+            val jsonProvincia = JSONObject()
+            jsonProvincia.put("nombre", provincia)
+            val jsonLocalidad = JSONObject()
+            jsonLocalidad.apply {
+                put("nombre",concello)
+                put("provincia",jsonProvincia)
+            }
+            json.put("localidad",estacion.localidad)
+            json.put("localidad",jsonLocalidad)
             result.put(json)
         }
 

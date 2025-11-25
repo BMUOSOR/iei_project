@@ -6,9 +6,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object SupabaseService {
 
-    private const val BASE_URL = "https://TU_PROJECT_ID.supabase.co/rest/v1/"
-    private const val API_KEY = "TU_API_KEY"
-
+    private const val BASE_URL = "https://drwmjxlwphrvqyqwythj.supabase.co/rest/v1/"
+    private const val API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRyd21qeGx3cGhydnF5cXd5dGhqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Mjk0Nzg5MywiZXhwIjoyMDc4NTIzODkzfQ.ZBeBqrM_KwDguMblVGQDeGIi_rsboDN6sxudrtyVug4"
     private val client = OkHttpClient.Builder()
         .addInterceptor { chain ->
             val request = chain.request().newBuilder()
