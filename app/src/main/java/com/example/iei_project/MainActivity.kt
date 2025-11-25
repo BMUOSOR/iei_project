@@ -15,15 +15,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.iei_project.backend.api.extractors.ExtractorEstacion
-import com.example.iei_project.backend.api.extractors.ExtractorLocalidad
-import com.example.iei_project.backend.api.extractors.ExtractorProvincia
-import com.example.iei_project.backend.api.conversors.CsvConversorGAL
-import com.example.iei_project.backend.api.conversors.JsonConversorCV
-import com.example.iei_project.backend.api.conversors.XmlConversorCAT
 import com.example.iei_project.ui.theme.Iei_projectTheme
 import com.example.iei_project.ui.viewmodel.EstacionesViewModel
-import org.json.JSONArray
 import java.io.InputStream
 
 class MainActivity : ComponentActivity(
@@ -40,35 +33,10 @@ class MainActivity : ComponentActivity(
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("MainActivity", "Cargando los datos...")
-        viewModel.cargar(JSONArray(readAsset("estaciones.json")),readAssetStream("ITV-CAT.xml"),readAsset("Estacions_ITV.csv").reader())
-        /*
-        val extractorEstacion = ExtractorEstacion(Geocoder(this), ExtractorLocalidad(ExtractorProvincia()))
-        // -------- JSON (lista) ----------
-        val jsonString = readAsset("estaciones.json")
-        val jsonArray = JSONArray(jsonString)
-        val wrapperCV = JsonConversorCV(Geocoder(this))
-        val listaCV = wrapperCV.wrapList(jsonArray)
+        //val jsonCV = readAsset("estaciones.json")
 
-        Log.d("ITV", "CV primera estación → ${extractorEstacion.extractLista(listaCV).firstOrNull()}")
-        Log.d("SupabaseService", "Subiendo la primera estación")
+        //viewModel.cargar(JSONArray(jsonCV),readAssetStream("ITV-CAT.xml"),readAsset("Estacions_ITV.csv").reader())
 
-        // -------- XML (lista) ----------
-        val xmlStream = readAssetStream("ITV-CAT.xml")
-        val catExtractor = XmlConversorCAT()
-        val listaCAT = catExtractor.parseList(xmlStream)
-
-        Log.d("ITV", "CAT primera estación → ${extractorEstacion.extractLista(listaCAT).firstOrNull()}")
-
-
-        // -------- CSV (lista) ----------
-        val csvReader = readAsset("Estacions_ITV.csv").reader()
-        val galExtractor = CsvConversorGAL()
-        val listaGAL = galExtractor.parse(csvReader)
-
-        Log.d("ITV", "GAL primera estación → ${extractorEstacion.extractLista(listaGAL).firstOrNull()}")
-
-
-         */
 
         // -------- Compose UI --------
         enableEdgeToEdge()

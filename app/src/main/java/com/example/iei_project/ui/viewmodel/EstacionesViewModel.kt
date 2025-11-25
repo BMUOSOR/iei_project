@@ -5,20 +5,28 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.iei_project.backend.api.conversors.CsvConversorGAL
 import com.example.iei_project.backend.api.conversors.XmlConversorCAT
+import com.example.iei_project.backend.api.dtos.EstacionDTO
+import com.example.iei_project.backend.api.dtos.LocalidadDTO
+import com.example.iei_project.backend.api.dtos.ProvinciaDTO
 import com.example.iei_project.backend.api.extractors.ExtractorLocalidad
 import com.example.iei_project.backend.api.extractors.ExtractorProvincia
-import com.example.iei_project.backend.api.repository.EstacionRepository
-import com.example.iei_project.backend.api.service.SupabaseService
+import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.serializer.KotlinXSerializer
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.InputStream
 import java.io.Reader
 
-class EstacionesViewModel(
-    private val repo: EstacionRepository = EstacionRepository(),
-) : ViewModel() {
+class EstacionesViewModel() : ViewModel() {
 
+    var supabase = createSupabaseClient("https://drwmjxlwphrvqyqwythj.supabase.co/rest/v1/", supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRyd21qeGx3cGhydnF5cXd5dGhqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Mjk0Nzg5MywiZXhwIjoyMDc4NTIzODkzfQ.ZBeBqrM_KwDguMblVGQDeGIi_rsboDN6sxudrtyVug4") {
+        defaultSerializer = KotlinXSerializer(Json {
+
+        })
+    };
     private val catExtractor = XmlConversorCAT()
     private val galExtractor = CsvConversorGAL()
 
@@ -42,14 +50,16 @@ class EstacionesViewModel(
             val estacionPost = arrayPost.getJSONObject(i)
             val localidadJSON = estacionPost.getJSONObject("localidad")
             val provinciaJSON = localidadJSON.getJSONObject("provincia")
-            val provincia = extProvincia.extractProvincia(provinciaJSON)
-            val localidad = extLocalidad.extractLocalidad(localidadJSON)
-            val localidadDTO = repo.subirLocalidad(localidadJSON)
-            val provinciaDTO = repo.subirProvincia(provincia)
+            val provinciaDTO = supabase.from("Provincia").insert(provinciaJSON).decodeSingle<ProvinciaDTO>()
+            val localidadDTO = supabase.from("Localidad").insert(localidadJSON)
+            supabase.from("Localidad").update( {
+                set("provincia",provinciaDTO.codigo)
+            })
             estacionPost.remove("localidad")
-            estacionPost.put("localidad",localidadDTO.get(0).codigo)
-            Log.d("Subida Array", "El objeto json estación se ha quedado como: $estacionPost")
-            repo.subirEstacion(estacionPost)
+            supabase.from("Estacion").insert(estacionPost)
+            supabase.from("Estacion").update( {
+                set("localidad",localidadDTO.decodeSingle<LocalidadDTO>().codigo)
+            })
         }
     }
 }
