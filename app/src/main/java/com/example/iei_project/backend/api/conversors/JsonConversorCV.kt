@@ -50,7 +50,7 @@ class JsonConversorCV() {
             put("provincia",provincia)
         }
 
-        val nombre = "CV${json.getString("Nº ESTACIÓN")}"
+        val nombre = "CV${json.getString("DIRECCIÓN")}"
 
         val direccion = json.getString("DIRECCIÓN")
 

@@ -92,8 +92,8 @@ class EstacionesViewModel(
             Log.d("CARGAR", "${fuenteCV}")
             val arrCV = conversorCV.parseList(fuenteCV, geocoder)
             Log.d("CARGAR", "Valencia: $arrCV")
-            //postearArray(arrGAL)
-            //postearArray(arrCAT)
+            postearArray(arrGAL)
+            postearArray(arrCAT)
             postearArray(arrCV)
 
         }
@@ -106,8 +106,6 @@ class EstacionesViewModel(
             try {
                 val estacionJson = arrayPost.getJSONObject(i)
                 val estacion: Estacion = extractorEstacion.extractEstacion(estacionJson)
-                Log.d("postearArray", "Estación a postear: $estacion")
-
                 val existente = supabase.from("estacion")
                     .select {
                         filter {
@@ -119,8 +117,6 @@ class EstacionesViewModel(
                     Log.d("postearArray", "La estación '${estacion.nombre}' ya existe. Saltando inserción.")
                     continue
                 }
-
-                Log.d("provincia de estacion", "${estacion.localidad.provincia.nombre}")
                 val provinciaId = getOrCreateProvincia(estacion.localidad.provincia)
 
 
@@ -151,9 +147,6 @@ class EstacionesViewModel(
         Log.d("postearArray", "--- Subida finalizada ---")
     }
 
-    /**
-     * Busca una provincia por nombre. Si no existe, la crea. Devuelve su ID.
-     */
     private suspend fun getOrCreateProvincia(provincia: Provincia): Long {
         val resultado = supabase.from("provincia").select {
             filter {
@@ -173,9 +166,6 @@ class EstacionesViewModel(
         }
     }
 
-    /**
-     * Busca una localidad por nombre y provincia_id. Si no existe, la crea. Devuelve su ID.
-     */
     private suspend fun getOrCreateLocalidad(localidad: Localidad, provinciaId: Long): Long {
         val resultado = supabase.from("localidad").select {
             filter {
@@ -191,13 +181,10 @@ class EstacionesViewModel(
         } else {
             Log.d("Relaciones", "Creando nueva localidad: ${localidad.nombre} en provincia ID: $provinciaId")
             val localidadDTO = LocalidadDTO2(nombre = localidad.nombre, provincia = provinciaId)
-            Log.d("Relaciones", "Localidad DTO: ${localidadDTO.nombre} - ${localidadDTO.provincia}")
             val nuevaLocalidad : LocalidadDTO = supabase.from("localidad").insert(localidadDTO) {
                 select()
             }.decodeSingle<LocalidadDTO>()
             return nuevaLocalidad.codigo!!
-
         }
     }
-
 }

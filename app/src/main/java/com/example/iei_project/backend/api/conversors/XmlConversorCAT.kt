@@ -101,7 +101,7 @@ class XmlConversorCAT {
             put("provincia",jsonProvincia)
         }
         return JSONObject().apply {
-            put("nombre", "CAT$estaci")
+            put("nombre", "CAT$direccion")
             put("tipo", "EstacionFija") // o tu enum según convenga
             put("direccion", direccion)
             put("codigo_postal", cp)

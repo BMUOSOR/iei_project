@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         Log.d("MainActivity", "Cargando los datos...")
-        viewModel.cargar(JSONArray(readAsset("estaciones.json")),readAssetStream("ITV-CAT.xml"),readAssetStream("Estacions_ITV.csv").reader(),geocoder)
+        viewModel.cargar(JSONArray(readAsset("estaciones.json")),readAssetStream("ITV-CAT.xml"),readAssetStream("Estacions_ITV.csv").bufferedReader(Charsets.ISO_8859_1),geocoder)
 
 
 

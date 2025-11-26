@@ -15,6 +15,8 @@ import java.nio.charset.StandardCharsets
 class CsvConversorGAL() {
 
     fun parseList(reader: Reader): JSONArray {
+
+
         val csv = CSVReaderBuilder(reader)
             .withCSVParser(CSVParserBuilder().withSeparator(';').build())
             .build()
