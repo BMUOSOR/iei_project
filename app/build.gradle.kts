@@ -72,5 +72,8 @@ dependencies {
     // Debug implementations
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation("io.ktor:ktor-client-android:3.3.2")
+
 }
 

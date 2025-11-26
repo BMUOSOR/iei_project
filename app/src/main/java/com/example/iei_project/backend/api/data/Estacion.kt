@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Estacion (
+    val cod_estacion: Long? = null,
     val nombre: String,
     val tipo: TipoEstacion,
     val direccion: String,

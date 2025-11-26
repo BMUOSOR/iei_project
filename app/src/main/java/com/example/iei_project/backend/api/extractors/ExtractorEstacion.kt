@@ -4,14 +4,15 @@ import android.location.Geocoder
 import android.util.Log
 import com.example.iei_project.backend.api.data.Estacion
 import com.example.iei_project.backend.api.data.Localidad
+import com.example.iei_project.backend.api.dtos.EstacionDTO
 import com.example.iei_project.backend.api.dtos.TipoEstacion
 import org.json.JSONArray
 import org.json.JSONObject
 
-class ExtractorEstacion(private val geocoder : Geocoder,
+class ExtractorEstacion(
     private val extractorLocalidad : ExtractorLocalidad
 ) {
-    /*
+
     fun extractEstacion(json : JSONObject) : Estacion {
         Log.d("TEST", json.toString())
 
@@ -22,7 +23,6 @@ class ExtractorEstacion(private val geocoder : Geocoder,
         }
 
         val direccion = json.getString("direccion")
-        val coords = geocoder.getFromLocationName(direccion, 1)?.firstOrNull()
         return Estacion(
             nombre = "CV-${json.getString("nombre")}",
             tipo = tipoEnum,
@@ -33,6 +33,7 @@ class ExtractorEstacion(private val geocoder : Geocoder,
             horario = json.getString("horario"),
             contacto = json.getString("contacto"),
             url = json.getString("url"),
+            localidad = extractorLocalidad.extractLocalidad(json.getJSONObject("localidad"))
 
         )
     }
@@ -46,5 +47,5 @@ class ExtractorEstacion(private val geocoder : Geocoder,
         return listaRet
     }
 
-     */
+
 }

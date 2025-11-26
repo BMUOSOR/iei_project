@@ -10,7 +10,7 @@ class SupabaseConfig(
 ) {
 
     fun supabaseClient(): SupabaseClient {
-        val BASE_URL = "https://drwmjxlwphrvqyqwythj.supabase.co/rest/v1/"
+        val BASE_URL = "https://drwmjxlwphrvqyqwythj.supabase.co"
         val API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRyd21qeGx3cGhydnF5cXd5dGhqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Mjk0Nzg5MywiZXhwIjoyMDc4NTIzODkzfQ.ZBeBqrM_KwDguMblVGQDeGIi_rsboDN6sxudrtyVug4"
         return createSupabaseClient(
             supabaseUrl = BASE_URL,

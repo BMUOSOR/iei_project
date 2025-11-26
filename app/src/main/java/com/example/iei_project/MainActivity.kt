@@ -17,11 +17,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.iei_project.ui.theme.Iei_projectTheme
 import com.example.iei_project.ui.viewmodel.EstacionesViewModel
+import org.json.JSONArray
+import java.io.File
 import java.io.InputStream
 
 class MainActivity : ComponentActivity() {
 
     private val viewModel : EstacionesViewModel by viewModels()
+
 
     fun Context.readAsset(name: String): String =
         assets.open(name).bufferedReader().use { it.readText() }
@@ -32,9 +35,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("MainActivity", "Cargando los datos...")
-        //val jsonCV = readAsset("estaciones.json")
+        viewModel.cargar(JSONArray(readAsset("estaciones.json")),readAssetStream("ITV-CAT.xml"),readAssetStream("Estacions_ITV.csv").reader())
 
-        //viewModel.cargar(JSONArray(jsonCV),readAssetStream("ITV-CAT.xml"),readAsset("Estacions_ITV.csv").reader())
 
 
         // -------- Compose UI --------

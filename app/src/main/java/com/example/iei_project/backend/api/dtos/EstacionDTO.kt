@@ -1,6 +1,10 @@
 package com.example.iei_project.backend.api.dtos
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 class EstacionDTO (
+    val cod_estacion: Long? = null,
     val nombre: String,
     val tipo: TipoEstacion,
     val direccion: String,
@@ -11,5 +15,5 @@ class EstacionDTO (
     val horario: String,
     val contacto: String,
     val url: String,
-    val localidad: Long
+    val localidad: Long? = null
 )
