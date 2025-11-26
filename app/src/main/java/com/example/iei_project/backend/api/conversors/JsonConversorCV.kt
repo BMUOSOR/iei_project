@@ -4,6 +4,8 @@ import android.location.Address
 import android.location.Geocoder
 import android.util.Log
 
+import com.example.iei_project.backend.api.data.Localidad
+import com.example.iei_project.backend.api.data.Provincia
 import com.example.iei_project.backend.api.dtos.TipoEstacion
 import org.json.JSONArray
 import org.json.JSONObject
@@ -71,6 +73,7 @@ class JsonConversorCV() {
             put("horario",horario)
             put("contacto",contacto)
             put("url",url)
+            put("localidad",localidad)
         }
 
         return jsonRet

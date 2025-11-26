@@ -65,7 +65,10 @@ class EstacionesViewModel(
             Log.d("CARGAR", "Catalunya: ${arrCAT}")
             Log.d("CARGAR", "${fuenteCV}")
             val arrCV = conversorCV.parseList(fuenteCV, geocoder)
-            Log.d("CARGAR", "Valencia: ${arrCV.toString()}")
+            Log.d("CARGAR", "Valencia: $arrCV")
+            //postearArray(arrGAL)
+            postearArray(arrCAT)
+            postearArray(arrCV)
 
         }
     }
@@ -73,14 +76,16 @@ class EstacionesViewModel(
 
     suspend fun postearArray(arrayPost: JSONArray) {
         for (i in 0..<arrayPost.length()) {
+            Log.d("postearArray", "Procesando elemento $i del array...")
             try {
                 val estacionPost = arrayPost.getJSONObject(i)
                 val extEstacion = ExtractorEstacion(extLocalidad)
                 val estacion = extEstacion.extractEstacion(estacionPost)
+
                 val existente = supabase.from("estacion")
-                    .select(columns = Columns.list("id")) {
+                    .select(columns = Columns.list("cod_estacion")) {
                         filter { eq("nombre", estacion.nombre) }
-                    }.decodeAs<List<Map<String, Any>>>()
+                    }.decodeAs<List<Map<String, Estacion>>>()
                 if (existente.isNotEmpty()) {
                     Log.d("postearArray", "La estación '${estacion.nombre}' ya existe. Saltando inserción.")
 
