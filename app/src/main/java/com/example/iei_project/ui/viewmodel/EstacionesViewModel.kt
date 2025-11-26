@@ -63,6 +63,7 @@ class EstacionesViewModel(
             Log.d("CARGAR", "Galicia: ${arrGAL}")
             val arrCAT = conversorCAT.parseList(fuenteCAT)
             Log.d("CARGAR", "Catalunya: ${arrCAT}")
+            Log.d("CARGAR", "${fuenteCV}")
             val arrCV = conversorCV.parseList(fuenteCV, geocoder)
             Log.d("CARGAR", "Valencia: ${arrCV.toString()}")
 

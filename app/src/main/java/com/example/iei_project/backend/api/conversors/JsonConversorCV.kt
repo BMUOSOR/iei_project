@@ -4,8 +4,6 @@ import android.location.Address
 import android.location.Geocoder
 import android.util.Log
 
-import com.example.iei_project.backend.api.data.Localidad
-import com.example.iei_project.backend.api.data.Provincia
 import com.example.iei_project.backend.api.dtos.TipoEstacion
 import org.json.JSONArray
 import org.json.JSONObject
@@ -24,7 +22,8 @@ class JsonConversorCV() {
         return list
     }
     private fun parse(json: JSONObject, geocoder: Geocoder): JSONObject {
-        val json = JSONObject()
+
+        val jsonRet = JSONObject()
         val tipoEnum = when(json.getString("TIPO ESTACIÓN").lowercase()) {
             "estación fija" -> TipoEstacion.EstacionFija
             "estación móvil" -> TipoEstacion.EstacionMovil
@@ -61,7 +60,7 @@ class JsonConversorCV() {
 
         val url = json.getString("CORREO")
 
-        json.apply {
+        jsonRet.apply {
             put("nombre",nombre)
             put("tipo",tipoEnum)
             put("direccion",direccion)
@@ -74,7 +73,7 @@ class JsonConversorCV() {
             put("url",url)
         }
 
-        return json
+        return jsonRet
     }
 
     fun getCoords(direccion: String, geocoder: Geocoder): Address? {
