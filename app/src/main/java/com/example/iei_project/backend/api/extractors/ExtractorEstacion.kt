@@ -27,23 +27,11 @@ class ExtractorEstacion(
             longitud = json.getDouble("longitud"),
             descripcion = json.getString("descripcion"),
             horario = json.getString("horario"),
-            contacto = json.getString("correo"),
+            contacto = json.getString("contacto"),
             url = json.getString("url"),
             localidad = extractorLocalidad.extractLocalidad(json.getJSONObject("localidad"))
 
         )
     }
-
-    fun extractLista(lista : JSONArray) : List<Estacion> {
-        val listaRet = ArrayList<Estacion>()
-        for(i in 0 until lista.length()) {
-            val element = lista.getJSONObject(i);
-            listaRet.add(extractEstacion(element))
-        }
-        return listaRet
-    }
-
-
-
 
 }

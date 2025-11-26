@@ -68,8 +68,8 @@ class EstacionesViewModel(
             val arrCV = conversorCV.parseList(fuenteCV, geocoder)
             Log.d("CARGAR", "Valencia: $arrCV")
             postearArray(arrGAL)
-            //postearArray(arrCAT)
-            //postearArray(arrCV)
+            postearArray(arrCAT)
+            postearArray(arrCV)
 
         }
     }
@@ -87,37 +87,36 @@ class EstacionesViewModel(
                         filter {
                             eq("nombre", estacion.nombre)
                         }
-                    }.decodeAs<List<Estacion>>()
+                    }.decodeSingleOrNull<Estacion>()
 
-                if (existente.isNotEmpty()) {
+                if (existente != null) {
                     Log.d("postearArray", "La estación '${estacion.nombre}' ya existe. Saltando inserción.")
                     continue
                 }
 
-
+                Log.d("provincia de estacion", "${estacion.localidad.provincia.nombre}")
                 val provinciaId = getOrCreateProvincia(estacion.localidad.provincia)
 
 
                 val localidadId = getOrCreateLocalidad(estacion.localidad, provinciaId)
 
 
-                val estacionMap = mapOf(
-                    "nombre" to estacion.nombre,
-                    "tipo" to estacion.tipo,
-                    "direccion" to estacion.direccion,
-                    "codigo_postal" to estacion.codigo_postal,
-                    "latitud" to estacion.latitud,
-                    "longitud" to estacion.longitud,
-                    "descripcion" to estacion.descripcion,
-                    "horario" to estacion.horario,
-                    "contacto" to estacion.contacto,
-                    "url" to estacion.url,
-                    "localidad" to localidadId
-
+                val estacionDTO = EstacionDTO(estacion.cod_estacion,
+                    estacion.nombre,
+                    estacion.tipo,
+                    estacion.direccion,
+                    estacion.codigo_postal,
+                    estacion.latitud,
+                    estacion.longitud,
+                    estacion.descripcion,
+                    estacion.horario,
+                    estacion.contacto,
+                    estacion.url,
+                    localidadId
                 )
 
 
-                supabase.from("estacion").insert(estacionMap)
+                supabase.from("estacion").insert(estacionDTO)
                 Log.i("postearArray", "Estación '${estacion.nombre}' insertada correctamente.")
 
             } catch (e: Exception) {
@@ -141,6 +140,7 @@ class EstacionesViewModel(
             resultado.codigo
         } else {
             Log.d("Relaciones", "Creando nueva provincia: ${provincia.nombre}")
+
             val nuevaProvincia = supabase.from("provincia").insert(provincia) {
                 select()
             }.decodeSingle<Provincia>()
@@ -165,8 +165,9 @@ class EstacionesViewModel(
             resultado.codigo
         } else {
             Log.d("Relaciones", "Creando nueva localidad: ${localidad.nombre} en provincia ID: $provinciaId")
-            val localidadMap = mapOf("nombre" to localidad.nombre, "provincia" to provinciaId)
-            val nuevaLocalidad = supabase.from("localidad").insert(localidadMap) {
+            val localidadDTO = LocalidadDTO(localidad.codigo, localidad.nombre, provinciaId)
+            Log.d("Relaciones", "Localidad DTO: ${localidadDTO.nombre} - ${localidadDTO.provincia}")
+            val nuevaLocalidad = supabase.from("localidad").insert(localidadDTO) {
                 select()
             }.decodeSingle<Localidad>()
             nuevaLocalidad.codigo!!
