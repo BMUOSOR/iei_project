@@ -32,15 +32,25 @@ class JsonConversorCV() {
             else -> TipoEstacion.Otro
         }
 
+        val url = when(json.getString("TIPO ESTACIÓN").lowercase()) {
+            "estación fija" -> "https://sitval.com/centros"
+            "estación móvil" -> "https://sitval.com/centros/movil"
+            else -> "https://sitval.com/centros"
+        }
+
         val provincia = JSONObject().apply {
             put("nombre",json.getString("PROVINCIA"))
         }
+        var nombreLocalidad = json.getString("MUNICIPIO")
+        if(nombreLocalidad == "") {
+            nombreLocalidad = "No localidad" + json.getString("Nº ESTACIÓN")
+        }
         val localidad = JSONObject().apply {
-            put("nombre",json.getString("MUNICIPIO"))
+            put("nombre",nombreLocalidad)
             put("provincia",provincia)
         }
 
-        val nombre = "CV-${json.getString("Nº ESTACIÓN")}"
+        val nombre = "CV${json.getString("Nº ESTACIÓN")}"
 
         val direccion = json.getString("DIRECCIÓN")
 
@@ -60,13 +70,16 @@ class JsonConversorCV() {
 
         val contacto = json.getString("CORREO")
 
-        val url = json.getString("CORREO")
+        var codigo_postal = json.getString("C.POSTAL")
+        if(codigo_postal == "") {
+            codigo_postal = "00000"
+        }
 
         jsonRet.apply {
             put("nombre",nombre)
             put("tipo",tipoEnum)
             put("direccion",direccion)
-            put("codigo_postal",json.getString("C.POSTAL"))
+            put("codigo_postal",codigo_postal)
             put("latitud",latitud)
             put("longitud",longitud)
             put("descripcion","")

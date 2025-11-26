@@ -1,11 +1,11 @@
-package com.example.iei_project.backend.api.data
+package com.example.iei_project.backend.api.dtos
 
-import com.example.iei_project.backend.api.dtos.TipoEstacion
 import kotlinx.serialization.Serializable
 
+
 @Serializable
-data class Estacion (
-    val cod_estacion: Long? = null,
+class EstacionDTO2 (
+
     val nombre: String,
     val tipo: TipoEstacion,
     val direccion: String,
@@ -16,5 +16,5 @@ data class Estacion (
     val horario: String,
     val contacto: String,
     val url: String,
-    val localidad: Localidad
+    val localidad: Long
 )

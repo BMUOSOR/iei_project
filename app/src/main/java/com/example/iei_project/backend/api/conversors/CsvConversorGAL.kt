@@ -30,7 +30,6 @@ class CsvConversorGAL() {
             val provinciaRaw = row[4]
             val bytesProvincia = provinciaRaw.toByteArray(StandardCharsets.UTF_8)
             val provincia = String(bytesProvincia, StandardCharsets.UTF_8)
-            Log.d("Provincia", "Nombre: $provincia")
             val horario = row[6]
             val url = row[7]
             val correo = row[8]
@@ -38,7 +37,7 @@ class CsvConversorGAL() {
 
             val (lat, lon) = gmapsToDecimal(coords)
             val estacion = Estacion(
-                nombre = "GAL-$nombre",
+                nombre = "GAL$nombre",
                 tipo = TipoEstacion.EstacionFija,
                 direccion = direccion,
                 codigo_postal = cp,

@@ -4,11 +4,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class EstacionDTO (
-    val cod_estacion: Long?,
+    val cod_estacion: Long,
     val nombre: String,
     val tipo: TipoEstacion,
     val direccion: String,
-    val codigo_postal: Long,
+    val codigo_postal: String,
     val latitud: Double,
     val longitud: Double,
     val descripcion: String = "",

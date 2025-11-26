@@ -11,7 +11,10 @@ import com.example.iei_project.backend.api.data.Estacion
 import com.example.iei_project.backend.api.data.Localidad
 import com.example.iei_project.backend.api.data.Provincia
 import com.example.iei_project.backend.api.dtos.EstacionDTO
+import com.example.iei_project.backend.api.dtos.EstacionDTO2
 import com.example.iei_project.backend.api.dtos.LocalidadDTO
+import com.example.iei_project.backend.api.dtos.LocalidadDTO2
+import com.example.iei_project.backend.api.dtos.ProvinciaDTO
 import com.example.iei_project.backend.api.extractors.ExtractorEstacion
 import com.example.iei_project.backend.api.extractors.ExtractorLocalidad
 import com.example.iei_project.backend.api.extractors.ExtractorProvincia
@@ -19,6 +22,7 @@ import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.serializer.KotlinXSerializer
 import kotlinx.coroutines.launch
@@ -31,6 +35,14 @@ class EstacionesViewModel(
 ) : ViewModel() {
 
 
+    var supabaseDelete = createSupabaseClient(
+        supabaseKey= "sb_secret_2tAhkIjkeePzVhNqQOD7Ag_3rEw74MK",
+        supabaseUrl = "https://drwmjxlwphrvqyqwythj.supabase.co"
+    ) {
+        defaultSerializer = KotlinXSerializer(Json {  })
+        install(Postgrest)
+        install(Auth)
+    }
     var supabase = createSupabaseClient(
         "https://drwmjxlwphrvqyqwythj.supabase.co",
         supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRyd21qeGx3cGhydnF5cXd5dGhqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Mjk0Nzg5MywiZXhwIjoyMDc4NTIzODkzfQ.ZBeBqrM_KwDguMblVGQDeGIi_rsboDN6sxudrtyVug4"
@@ -54,6 +66,25 @@ class EstacionesViewModel(
 
         viewModelScope.launch {
 
+
+
+            supabaseDelete.from("estacion").delete {
+                filter {
+                    gt("cod_estacion", 0)
+                }
+            }
+            supabaseDelete.from("localidad").delete {
+
+                filter {
+                    gt("codigo",0)
+                }
+            }
+            supabaseDelete.from("provincia").delete {
+                filter {
+                    gt("codigo",0)
+                }
+            }
+
             val arrGAL = conversorGAL.parseList(fuenteGAL)
             Log.d("CARGAR", "Galicia: ${arrGAL}")
             val arrCAT = conversorCAT.parseList(fuenteCAT)
@@ -61,8 +92,8 @@ class EstacionesViewModel(
             Log.d("CARGAR", "${fuenteCV}")
             val arrCV = conversorCV.parseList(fuenteCV, geocoder)
             Log.d("CARGAR", "Valencia: $arrCV")
-            postearArray(arrGAL)
-            postearArray(arrCAT)
+            //postearArray(arrGAL)
+            //postearArray(arrCAT)
             postearArray(arrCV)
 
         }
@@ -82,7 +113,7 @@ class EstacionesViewModel(
                         filter {
                             eq("nombre", estacion.nombre)
                         }
-                    }.decodeSingleOrNull<Estacion>()
+                    }.decodeSingleOrNull<EstacionDTO>()
 
                 if (existente != null) {
                     Log.d("postearArray", "La estación '${estacion.nombre}' ya existe. Saltando inserción.")
@@ -96,7 +127,7 @@ class EstacionesViewModel(
                 val localidadId = getOrCreateLocalidad(estacion.localidad, provinciaId)
 
 
-                val estacionDTO = EstacionDTO(estacion.cod_estacion,
+                val estacionDTO = EstacionDTO2(
                     estacion.nombre,
                     estacion.tipo,
                     estacion.direccion,
@@ -109,7 +140,6 @@ class EstacionesViewModel(
                     estacion.url,
                     localidadId
                 )
-
 
                 supabase.from("estacion").insert(estacionDTO)
                 Log.i("postearArray", "Estación '${estacion.nombre}' insertada correctamente.")
@@ -129,17 +159,17 @@ class EstacionesViewModel(
             filter {
                 eq("nombre", provincia.nombre)
             }
-        }.decodeSingleOrNull<Provincia>()
+        }.decodeSingleOrNull<ProvinciaDTO>()
 
-        return if (resultado?.codigo != null) {
-            resultado.codigo
+         if (resultado?.codigo != null) {
+            return resultado.codigo
         } else {
             Log.d("Relaciones", "Creando nueva provincia: ${provincia.nombre}")
 
-            val nuevaProvincia = supabase.from("provincia").insert(provincia) {
+            val nuevaProvincia : ProvinciaDTO = supabase.from("provincia").insert(provincia) {
                 select()
-            }.decodeSingle<Provincia>()
-            nuevaProvincia.codigo!!
+            }.decodeSingle<ProvinciaDTO>()
+            return nuevaProvincia.codigo!!
         }
     }
 
@@ -156,18 +186,18 @@ class EstacionesViewModel(
             }
         }.decodeSingleOrNull<LocalidadDTO>()
 
-        return if (resultado?.codigo != null) {
-            resultado.codigo
+        if (resultado?.codigo != null) {
+            return resultado.codigo
         } else {
             Log.d("Relaciones", "Creando nueva localidad: ${localidad.nombre} en provincia ID: $provinciaId")
-            val localidadDTO = LocalidadDTO(localidad.codigo, localidad.nombre, provinciaId)
+            val localidadDTO = LocalidadDTO2(nombre = localidad.nombre, provincia = provinciaId)
             Log.d("Relaciones", "Localidad DTO: ${localidadDTO.nombre} - ${localidadDTO.provincia}")
-            val nuevaLocalidad = supabase.from("localidad").insert(localidadDTO) {
+            val nuevaLocalidad : LocalidadDTO = supabase.from("localidad").insert(localidadDTO) {
                 select()
             }.decodeSingle<LocalidadDTO>()
-            nuevaLocalidad.codigo!!
+            return nuevaLocalidad.codigo!!
+
         }
     }
-
 
 }
