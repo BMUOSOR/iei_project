@@ -2,25 +2,28 @@ package com.example.iei_project.backend.api.conversors
 
 import android.location.Address
 import android.location.Geocoder
-import com.example.iei_project.backend.api.data.Estacion
+import android.util.Log
+
 import com.example.iei_project.backend.api.data.Localidad
 import com.example.iei_project.backend.api.data.Provincia
 import com.example.iei_project.backend.api.dtos.TipoEstacion
 import org.json.JSONArray
 import org.json.JSONObject
-class JsonConversorCV(private val geocoder: Geocoder) {
+import java.util.Locale
 
-    fun wrapList(jsonArray: JSONArray): JSONArray {
+class JsonConversorCV() {
+
+    fun parseList(jsonArray: JSONArray, geocoder: Geocoder): JSONArray {
         val list = JSONArray()
 
         for (i in 0 until jsonArray.length()) {
             val obj = jsonArray.getJSONObject(i)
-            list.put(parse(obj))
+            list.put(parse(obj, geocoder))
         }
 
         return list
     }
-    private fun parse(json: JSONObject): JSONObject {
+    private fun parse(json: JSONObject, geocoder: Geocoder): JSONObject {
         val json = JSONObject()
         val tipoEnum = when(json.getString("TIPO ESTACIÓN").lowercase()) {
             "estación fija" -> TipoEstacion.EstacionFija
@@ -28,44 +31,56 @@ class JsonConversorCV(private val geocoder: Geocoder) {
             else -> TipoEstacion.Otro
         }
 
-        val direccion = json.getString("DIRECCIÓN")
-        val coords = geocoder.getFromLocationName(direccion, 1)?.firstOrNull()
-        val estacion = Estacion(
-            nombre = "CV-${json.getInt("Nº ESTACIÓN")}",
-            tipo = tipoEnum,
-            direccion = direccion,
-            codigo_postal = json.getString("C.POSTAL"),
-            latitud = coords?.latitude ?: 0.0,
-            longitud = coords?.longitude ?: 0.0,
-            horario = json.getString("HORARIOS"),
-            contacto = json.getString("CORREO"),
-            url = "https://itv.gva.es",
-            localidad = Localidad(
-                nombre = json.getString("MUNICIPIO"),
-                provincia = Provincia(
-                    nombre = json.getString("PROVINCIA")
-                )
-            )
-        )
+        val provincia = JSONObject().apply {
+            put("nombre",json.getString("PROVINCIA"))
+        }
+        val localidad = JSONObject().apply {
+            put("nombre",json.getString("MUNICIPIO"))
+            put("provincia",provincia)
+        }
 
-        json.put("nombre",estacion.nombre)
-        json.put("tipo",estacion.tipo)
-        json.put("direccion", estacion.direccion)
-        json.put("codigo_postal",estacion.codigo_postal)
-        json.put("latitud",estacion.latitud)
-        json.put("longitud",estacion.longitud)
-        json.put("descripcion",estacion.descripcion)
-        json.put("horario",estacion.horario)
-        json.put("contacto",estacion.contacto)
-        json.put("url",estacion.url)
-        json.put("localidad",estacion.localidad)
+        val nombre = "CV-${json.getString("Nº ESTACIÓN")}"
+
+        val direccion = json.getString("DIRECCIÓN")
+
+        var coords = getCoords(direccion, geocoder)
+        if(coords==null) {
+            coords = Address(Locale.getDefault())
+            coords.longitude = 0.0
+            coords.latitude = 0.0
+            Log.e("CARGA", "Las coordenadas de la dirección: $direccion no se han encontrado. Instanciandolas a (0,0)")
+        }
+
+        val latitud = coords.latitude
+
+        val longitud = coords.longitude
+
+        val horario = json.getString("HORARIOS")
+
+        val contacto = json.getString("CORREO")
+
+        val url = json.getString("CORREO")
+
+        json.apply {
+            put("nombre",nombre)
+            put("tipo",tipoEnum)
+            put("direccion",direccion)
+            put("codigo_postal",json.getString("C.POSTAL"))
+            put("latitud",latitud)
+            put("longitud",longitud)
+            put("descripcion","")
+            put("horario",horario)
+            put("contacto",contacto)
+            put("url",url)
+        }
 
         return json
     }
 
-    fun getCoords(): Address? {
-        val direccion = "Carrer Major 11, Picanya"
-        val coords = geocoder.getFromLocationName(direccion,1)
+    fun getCoords(direccion: String, geocoder: Geocoder): Address? {
+        val coords = geocoder.getFromLocationName(direccion, 1)
         return coords?.firstOrNull()
     }
+
+
 }

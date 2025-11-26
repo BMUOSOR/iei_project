@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.iei_project.backend.api.conversors.CsvConversorGAL
 import com.example.iei_project.backend.api.conversors.JsonConversorCV
 import com.example.iei_project.backend.api.conversors.XmlConversorCAT
+import com.example.iei_project.backend.api.data.Estacion
 import com.example.iei_project.backend.api.data.Provincia
 import com.example.iei_project.backend.api.dtos.EstacionDTO
 import com.example.iei_project.backend.api.dtos.LocalidadDTO
@@ -28,11 +29,6 @@ import kotlinx.serialization.json.JsonObjectBuilder
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 import org.json.JSONArray
-import org.json.JSONObject
-import org.openqa.selenium.By
-import org.openqa.selenium.WebElement
-import org.openqa.selenium.chrome.ChromeDriver
-import org.openqa.selenium.chrome.ChromeDriverService
 import java.io.InputStream
 import java.io.Reader
 
@@ -50,21 +46,24 @@ class EstacionesViewModel(
         install(Postgrest)
         install(Auth)
     };
-    private val catExtractor = XmlConversorCAT()
-    private val galExtractor = CsvConversorGAL()
+    private val conversorCAT = XmlConversorCAT()
+    private val conversorGAL = CsvConversorGAL()
+
+    private val conversorCV = JsonConversorCV()
 
     private val extProvincia = ExtractorProvincia()
     private val extLocalidad = ExtractorLocalidad(extProvincia)
-
+    val extractorEstacion = ExtractorEstacion(extLocalidad)
 
     fun cargar(fuenteCV: JSONArray, fuenteCAT: InputStream, fuenteGAL: Reader, geocoder: Geocoder) {
+
         viewModelScope.launch {
-            val extractorEstacion = ExtractorEstacion(extLocalidad,geocoder)
-            val arrGAL = galExtractor.parse(fuenteGAL)
+
+            val arrGAL = conversorGAL.parseList(fuenteGAL)
             Log.d("CARGAR", "Galicia: ${arrGAL}")
-            val arrCAT = catExtractor.parseList(fuenteCAT)
+            val arrCAT = conversorCAT.parseList(fuenteCAT)
             Log.d("CARGAR", "Catalunya: ${arrCAT}")
-            val arrCV = extractorEstacion.extractLista(fuenteCV)
+            val arrCV = conversorCV.parseList(fuenteCV, geocoder)
             Log.d("CARGAR", "Valencia: ${arrCV.toString()}")
 
         }
@@ -73,40 +72,35 @@ class EstacionesViewModel(
 
     suspend fun postearArray(arrayPost: JSONArray) {
         for (i in 0..<arrayPost.length()) {
-            Log.d(
-                "Subida Array",
-                "Posteando elemento ${arrayPost.getJSONObject(i)} a la base de datos..."
-            )
-            /*
-            val estacionPost = arrayPost.getJSONObject(i)
-            val estacion = extEstacion.extractEstacion(estacionPost)
-            val provincia = extProvincia.extractProvincia(estacionPost.getJSONObject("localidad").getJSONObject("provincia"))
+            try {
+                val estacionPost = arrayPost.getJSONObject(i)
+                val extEstacion = ExtractorEstacion(extLocalidad)
+                val estacion = extEstacion.extractEstacion(estacionPost)
+                val existente = supabase.from("estacion")
+                    .select(columns = Columns.list("id")) {
+                        filter { eq("nombre", estacion.nombre) }
+                    }.decodeAs<List<Map<String, Any>>>()
+                if (existente.isNotEmpty()) {
+                    Log.d("postearArray", "La estación '${estacion.nombre}' ya existe. Saltando inserción.")
 
-            //PRUEBA DE FILTRAR POR FK
-/*
-            val columns = Columns.raw("""
-                localidad (
-                    provincia (
-                        codigo,
-                        nombre
+                } else {
+                    Log.d(
+                        "Subida Array",
+                        "Posteando elemento ${arrayPost.getJSONObject(i)} a la base de datos..."
                     )
-                )
-            """.trimIndent())
-            val provinciaExt = supabase.from("estacion").select(columns) {
-                filter{
-                    eq("localidad.provincia.nombre",estacion.localidad.provincia.nombre)
+                    val estacionParaInsertar: Estacion = extEstacion.extractEstacion(estacionPost)
+
+
+                    supabase.from("estacion").insert(estacionParaInsertar) {
+                        select()
+                    }
+
+                    Log.d("postearArray", "Estación '${estacion.nombre}' insertada correctamente.")
+
                 }
-            }.decodeSingle<Provincia>()
-            */
-            Log.d("SubidaArray","$provincia")
-            val response = supabase
-                .from("provincia")
-                .update(provincia)
-
-            Log.d("SubidaArray", "Insert result: $response")
-
-
-             */
+            } catch (e: Exception) {
+                Log.e("postearArray", "Error al procesar el elemento $i del array: ${e.message}", e)
+            }
         }
     }
 
