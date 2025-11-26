@@ -75,5 +75,8 @@ dependencies {
 
     implementation("io.ktor:ktor-client-android:3.3.2")
 
+    //Selenium
+    implementation("org.seleniumhq.selenium:selenium-java:4.38.0")
+
 }
 

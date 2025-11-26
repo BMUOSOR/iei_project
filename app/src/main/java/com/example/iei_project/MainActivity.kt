@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.iei_project.backend.api.conversors.JsonConversorCV
 import com.example.iei_project.ui.theme.Iei_projectTheme
 import com.example.iei_project.ui.viewmodel.EstacionesViewModel
 import org.json.JSONArray
@@ -23,6 +24,7 @@ import java.io.InputStream
 
 class MainActivity : ComponentActivity() {
 
+    val geocoder = Geocoder(this)
     private val viewModel : EstacionesViewModel by viewModels()
 
 
@@ -34,8 +36,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         Log.d("MainActivity", "Cargando los datos...")
-        viewModel.cargar(JSONArray(readAsset("estaciones.json")),readAssetStream("ITV-CAT.xml"),readAssetStream("Estacions_ITV.csv").reader())
+        viewModel.cargar(JSONArray(readAsset("estaciones.json")),readAssetStream("ITV-CAT.xml"),readAssetStream("Estacions_ITV.csv").reader(),geocoder)
 
 
 

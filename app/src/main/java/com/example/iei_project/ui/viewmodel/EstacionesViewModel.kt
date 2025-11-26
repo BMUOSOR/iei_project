@@ -1,10 +1,12 @@
 package com.example.iei_project.ui.viewmodel
 
+import android.location.Address
 import android.location.Geocoder
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.iei_project.backend.api.conversors.CsvConversorGAL
+import com.example.iei_project.backend.api.conversors.JsonConversorCV
 import com.example.iei_project.backend.api.conversors.XmlConversorCAT
 import com.example.iei_project.backend.api.data.Provincia
 import com.example.iei_project.backend.api.dtos.EstacionDTO
@@ -27,10 +29,16 @@ import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 import org.json.JSONArray
 import org.json.JSONObject
+import org.openqa.selenium.By
+import org.openqa.selenium.WebElement
+import org.openqa.selenium.chrome.ChromeDriver
+import org.openqa.selenium.chrome.ChromeDriverService
 import java.io.InputStream
 import java.io.Reader
 
-class EstacionesViewModel() : ViewModel() {
+class EstacionesViewModel(
+) : ViewModel() {
+
 
     var supabase = createSupabaseClient(
         "https://drwmjxlwphrvqyqwythj.supabase.co",
@@ -47,18 +55,21 @@ class EstacionesViewModel() : ViewModel() {
 
     private val extProvincia = ExtractorProvincia()
     private val extLocalidad = ExtractorLocalidad(extProvincia)
-    private val extEstacion = ExtractorEstacion(extLocalidad)
 
-    fun cargar(fuenteCV: JSONArray, fuenteCAT: InputStream, fuenteGAL: Reader) {
+
+    fun cargar(fuenteCV: JSONArray, fuenteCAT: InputStream, fuenteGAL: Reader, geocoder: Geocoder) {
         viewModelScope.launch {
-            val arrCV = fuenteCV
+            val extractorEstacion = ExtractorEstacion(extLocalidad,geocoder)
+            val arrGAL = galExtractor.parse(fuenteGAL)
+            Log.d("CARGAR", "Galicia: ${arrGAL}")
             val arrCAT = catExtractor.parseList(fuenteCAT)
-            //val arrGAL =  galExtractor.parse(fuenteGAL)
-            Log.d("Subida Array", "Subiendo array...")
-            postearArray(arrCAT)
+            Log.d("CARGAR", "Catalunya: ${arrCAT}")
+            val arrCV = extractorEstacion.extractLista(fuenteCV)
+            Log.d("CARGAR", "Valencia: ${arrCV.toString()}")
 
         }
     }
+
 
     suspend fun postearArray(arrayPost: JSONArray) {
         for (i in 0..<arrayPost.length()) {
@@ -66,6 +77,7 @@ class EstacionesViewModel() : ViewModel() {
                 "Subida Array",
                 "Posteando elemento ${arrayPost.getJSONObject(i)} a la base de datos..."
             )
+            /*
             val estacionPost = arrayPost.getJSONObject(i)
             val estacion = extEstacion.extractEstacion(estacionPost)
             val provincia = extProvincia.extractProvincia(estacionPost.getJSONObject("localidad").getJSONObject("provincia"))
@@ -93,6 +105,10 @@ class EstacionesViewModel() : ViewModel() {
 
             Log.d("SubidaArray", "Insert result: $response")
 
+
+             */
         }
     }
+
+
 }

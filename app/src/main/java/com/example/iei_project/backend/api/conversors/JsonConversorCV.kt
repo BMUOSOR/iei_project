@@ -1,5 +1,6 @@
 package com.example.iei_project.backend.api.conversors
 
+import android.location.Address
 import android.location.Geocoder
 import com.example.iei_project.backend.api.data.Estacion
 import com.example.iei_project.backend.api.data.Localidad
@@ -60,5 +61,11 @@ class JsonConversorCV(private val geocoder: Geocoder) {
         json.put("localidad",estacion.localidad)
 
         return json
+    }
+
+    fun getCoords(): Address? {
+        val direccion = "Carrer Major 11, Picanya"
+        val coords = geocoder.getFromLocationName(direccion,1)
+        return coords?.firstOrNull()
     }
 }
