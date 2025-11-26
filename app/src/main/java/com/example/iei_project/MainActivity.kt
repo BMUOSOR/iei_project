@@ -19,8 +19,7 @@ import com.example.iei_project.ui.theme.Iei_projectTheme
 import com.example.iei_project.ui.viewmodel.EstacionesViewModel
 import java.io.InputStream
 
-class MainActivity : ComponentActivity(
-) {
+class MainActivity : ComponentActivity() {
 
     private val viewModel : EstacionesViewModel by viewModels()
 

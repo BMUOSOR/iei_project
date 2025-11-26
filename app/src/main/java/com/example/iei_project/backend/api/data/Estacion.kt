@@ -1,7 +1,9 @@
 package com.example.iei_project.backend.api.data
 
 import com.example.iei_project.backend.api.dtos.TipoEstacion
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Estacion (
     val nombre: String,
     val tipo: TipoEstacion,
