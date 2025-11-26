@@ -38,8 +38,12 @@ class JsonConversorCV() {
             else -> "https://sitval.com/centros"
         }
 
+        var nombreProvincia = json.getString("PROVINCIA")
+        if(nombreProvincia=="Aligante") {
+            nombreProvincia = "Alicante"
+        }
         val provincia = JSONObject().apply {
-            put("nombre",json.getString("PROVINCIA"))
+            put("nombre",nombreProvincia)
         }
         var nombreLocalidad = json.getString("MUNICIPIO")
         if(nombreLocalidad == "") {
