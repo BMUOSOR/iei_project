@@ -9,6 +9,7 @@ import com.example.iei_project.backend.api.conversors.CsvConversorGAL
 import com.example.iei_project.backend.api.conversors.JsonConversorCV
 import com.example.iei_project.backend.api.conversors.XmlConversorCAT
 import com.example.iei_project.backend.api.data.Estacion
+import com.example.iei_project.backend.api.data.Localidad
 import com.example.iei_project.backend.api.data.Provincia
 import com.example.iei_project.backend.api.dtos.EstacionDTO
 import com.example.iei_project.backend.api.dtos.LocalidadDTO
@@ -66,47 +67,109 @@ class EstacionesViewModel(
             Log.d("CARGAR", "${fuenteCV}")
             val arrCV = conversorCV.parseList(fuenteCV, geocoder)
             Log.d("CARGAR", "Valencia: $arrCV")
-            //postearArray(arrGAL)
-            postearArray(arrCAT)
-            postearArray(arrCV)
+            postearArray(arrGAL)
+            //postearArray(arrCAT)
+            //postearArray(arrCV)
 
         }
     }
 
 
-    suspend fun postearArray(arrayPost: JSONArray) {
+    private suspend fun postearArray(arrayPost: JSONArray) {
+        Log.d("postearArray", "--- Iniciando subida para  (${arrayPost.length()} elementos) ---")
         for (i in 0..<arrayPost.length()) {
-            Log.d("postearArray", "Procesando elemento $i del array...")
             try {
-                val estacionPost = arrayPost.getJSONObject(i)
-                val extEstacion = ExtractorEstacion(extLocalidad)
-                val estacion = extEstacion.extractEstacion(estacionPost)
+                val estacionJson = arrayPost.getJSONObject(i)
+                val estacion: Estacion = extractorEstacion.extractEstacion(estacionJson)
 
                 val existente = supabase.from("estacion")
-                    .select(columns = Columns.list("cod_estacion")) {
-                        filter { eq("nombre", estacion.nombre) }
-                    }.decodeAs<List<Map<String, Estacion>>>()
+                    .select(Columns.list("nombre")) {
+                        filter {
+                            eq("nombre", estacion.nombre)
+                        }
+                    }.decodeAs<List<Estacion>>()
+
                 if (existente.isNotEmpty()) {
                     Log.d("postearArray", "La estación '${estacion.nombre}' ya existe. Saltando inserción.")
-
-                } else {
-                    Log.d(
-                        "Subida Array",
-                        "Posteando elemento ${arrayPost.getJSONObject(i)} a la base de datos..."
-                    )
-                    val estacionParaInsertar: Estacion = extEstacion.extractEstacion(estacionPost)
-
-
-                    supabase.from("estacion").insert(estacionParaInsertar) {
-                        select()
-                    }
-
-                    Log.d("postearArray", "Estación '${estacion.nombre}' insertada correctamente.")
-
+                    continue
                 }
+
+
+                val provinciaId = getOrCreateProvincia(estacion.localidad.provincia)
+
+
+                val localidadId = getOrCreateLocalidad(estacion.localidad, provinciaId)
+
+
+                val estacionMap = mapOf(
+                    "nombre" to estacion.nombre,
+                    "tipo" to estacion.tipo,
+                    "direccion" to estacion.direccion,
+                    "codigo_postal" to estacion.codigo_postal,
+                    "latitud" to estacion.latitud,
+                    "longitud" to estacion.longitud,
+                    "descripcion" to estacion.descripcion,
+                    "horario" to estacion.horario,
+                    "contacto" to estacion.contacto,
+                    "url" to estacion.url,
+                    "localidad" to localidadId
+
+                )
+
+
+                supabase.from("estacion").insert(estacionMap)
+                Log.i("postearArray", "Estación '${estacion.nombre}' insertada correctamente.")
+
             } catch (e: Exception) {
-                Log.e("postearArray", "Error al procesar el elemento $i del array: ${e.message}", e)
+                Log.e("postearArray", "Error al procesar el elemento $i: ${e.message}", e)
             }
+        }
+        Log.d("postearArray", "--- Subida finalizada ---")
+    }
+
+    /**
+     * Busca una provincia por nombre. Si no existe, la crea. Devuelve su ID.
+     */
+    private suspend fun getOrCreateProvincia(provincia: Provincia): Long {
+        val resultado = supabase.from("provincia").select {
+            filter {
+                eq("nombre", provincia.nombre)
+            }
+        }.decodeSingleOrNull<Provincia>()
+
+        return if (resultado?.codigo != null) {
+            resultado.codigo
+        } else {
+            Log.d("Relaciones", "Creando nueva provincia: ${provincia.nombre}")
+            val nuevaProvincia = supabase.from("provincia").insert(provincia) {
+                select()
+            }.decodeSingle<Provincia>()
+            nuevaProvincia.codigo!!
+        }
+    }
+
+    /**
+     * Busca una localidad por nombre y provincia_id. Si no existe, la crea. Devuelve su ID.
+     */
+    private suspend fun getOrCreateLocalidad(localidad: Localidad, provinciaId: Long): Long {
+        val resultado = supabase.from("localidad").select {
+            filter {
+                eq("nombre", localidad.nombre)
+            }
+            filter {
+                eq("provincia", provinciaId)
+            }
+        }.decodeSingleOrNull<Localidad>()
+
+        return if (resultado?.codigo != null) {
+            resultado.codigo
+        } else {
+            Log.d("Relaciones", "Creando nueva localidad: ${localidad.nombre} en provincia ID: $provinciaId")
+            val localidadMap = mapOf("nombre" to localidad.nombre, "provincia" to provinciaId)
+            val nuevaLocalidad = supabase.from("localidad").insert(localidadMap) {
+                select()
+            }.decodeSingle<Localidad>()
+            nuevaLocalidad.codigo!!
         }
     }
 
