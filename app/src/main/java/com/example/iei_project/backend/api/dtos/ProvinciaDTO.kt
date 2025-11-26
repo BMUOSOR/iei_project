@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class ProvinciaDTO(
-    val codigo: Long? = null,
+    val codigo: Long,
     val nombre : String
 ) {
 }

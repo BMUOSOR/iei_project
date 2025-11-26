@@ -1,6 +1,5 @@
 package com.example.iei_project.ui.viewmodel
 
-import android.location.Address
 import android.location.Geocoder
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -13,7 +12,6 @@ import com.example.iei_project.backend.api.data.Localidad
 import com.example.iei_project.backend.api.data.Provincia
 import com.example.iei_project.backend.api.dtos.EstacionDTO
 import com.example.iei_project.backend.api.dtos.LocalidadDTO
-import com.example.iei_project.backend.api.dtos.ProvinciaDTO
 import com.example.iei_project.backend.api.extractors.ExtractorEstacion
 import com.example.iei_project.backend.api.extractors.ExtractorLocalidad
 import com.example.iei_project.backend.api.extractors.ExtractorProvincia
@@ -22,13 +20,9 @@ import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
-import io.github.jan.supabase.postgrest.query.request.InsertRequestBuilder
 import io.github.jan.supabase.serializer.KotlinXSerializer
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObjectBuilder
-import kotlinx.serialization.json.encodeToJsonElement
-import kotlinx.serialization.json.jsonObject
 import org.json.JSONArray
 import java.io.InputStream
 import java.io.Reader
@@ -81,9 +75,10 @@ class EstacionesViewModel(
             try {
                 val estacionJson = arrayPost.getJSONObject(i)
                 val estacion: Estacion = extractorEstacion.extractEstacion(estacionJson)
+                Log.d("postearArray", "Estación a postear: $estacion")
 
                 val existente = supabase.from("estacion")
-                    .select(Columns.list("nombre")) {
+                    .select {
                         filter {
                             eq("nombre", estacion.nombre)
                         }
@@ -159,7 +154,7 @@ class EstacionesViewModel(
             filter {
                 eq("provincia", provinciaId)
             }
-        }.decodeSingleOrNull<Localidad>()
+        }.decodeSingleOrNull<LocalidadDTO>()
 
         return if (resultado?.codigo != null) {
             resultado.codigo
@@ -169,7 +164,7 @@ class EstacionesViewModel(
             Log.d("Relaciones", "Localidad DTO: ${localidadDTO.nombre} - ${localidadDTO.provincia}")
             val nuevaLocalidad = supabase.from("localidad").insert(localidadDTO) {
                 select()
-            }.decodeSingle<Localidad>()
+            }.decodeSingle<LocalidadDTO>()
             nuevaLocalidad.codigo!!
         }
     }

@@ -41,7 +41,7 @@ class CsvConversorGAL() {
                 nombre = "GAL-$nombre",
                 tipo = TipoEstacion.EstacionFija,
                 direccion = direccion,
-                codigo_postal = cp.toString(),
+                codigo_postal = cp,
                 latitud = lat,
                 longitud = lon,
                 horario = horario,

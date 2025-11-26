@@ -9,7 +9,7 @@ data class Estacion (
     val nombre: String,
     val tipo: TipoEstacion,
     val direccion: String,
-    val codigo_postal: String,
+    val codigo_postal: Long,
     val latitud: Double,
     val longitud: Double,
     val descripcion: String = "",
